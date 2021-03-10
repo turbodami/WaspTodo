@@ -1,0 +1,59 @@
+app TodoApp {
+  title: "TodoApp"
+}
+
+dependencies {=json
+  "react-clock": "3.0.0"
+json=}
+
+entity Task {=psl
+    id            Int   @id @default(autoincrement())
+    description   String
+    isDone        Boolean @default(false)
+    user          User?    @relation(fields: [userId], references: [id])
+    userId        Int?
+psl=}
+
+entity User {=psl
+    id            Int     @id @default(autoincrement())
+    email         String  @unique
+    password      String
+    tasks         Task[]
+psl=}
+
+query getTasks {
+    fn: import { getTasks } from "@ext/queries.js",
+    entities: [Task]
+}
+
+action createTask {
+    fn: import { createTask } from "@ext/actions.js",
+    entities: [Task]
+}
+
+action updateTask {
+    fn: import { updateTask } from "@ext/actions.js",
+    entities: [Task]
+}
+
+auth {
+    userEntity: User,
+    methods: [ EmailAndPassword ], 
+    onAuthFailedRedirectTo: "/login" 
+}
+
+route "/" -> page Main
+page Main {
+  authRequired: true,
+  component: import Main from "@ext/MainPage.js"
+}
+
+route "/signup" -> page Signup
+page Signup {
+    component: import Signup from "@ext/SignupPage"
+}
+
+route "/login" -> page Login
+page Login {
+    component: import Login from "@ext/LoginPage"
+}
